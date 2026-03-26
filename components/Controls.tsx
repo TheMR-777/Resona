@@ -1,0 +1,123 @@
+'use client';
+
+import React from 'react';
+import { useStore } from '@/lib/store';
+import { Volume2, VolumeX, Settings2, Eye, Box } from 'lucide-react';
+
+export function Controls() {
+  const {
+    speed, setSpeed,
+    damping, setDamping,
+    resolution, setResolution,
+    viewMode, setViewMode,
+    soundEnabled, toggleSound,
+    baseFrequency, setBaseFrequency,
+    radius, setRadius
+  } = useStore();
+
+  return (
+    <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6 w-80">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-medium text-white/90 flex items-center gap-2">
+          <Settings2 className="w-5 h-5 text-indigo-400" />
+          Simulation
+        </h2>
+        
+        <div className="flex gap-2">
+          <button
+            onClick={() => setViewMode(viewMode === 'solid' ? 'wireframe' : 'solid')}
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
+            title="Toggle View Mode"
+          >
+            {viewMode === 'solid' ? <Box className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={toggleSound}
+            className={`p-2 rounded-lg transition-colors ${
+              soundEnabled 
+                ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' 
+                : 'bg-white/5 text-white/50 border border-transparent hover:bg-white/10'
+            }`}
+            title="Toggle Sound"
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-white/60">
+            <span>Radius</span>
+            <span className="font-mono">{radius.toFixed(1)}</span>
+          </div>
+          <input
+            type="range"
+            min="0.5" max="3" step="0.1"
+            value={radius}
+            onChange={(e) => setRadius(parseFloat(e.target.value))}
+            className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-white/60">
+            <span>Speed</span>
+            <span className="font-mono">{speed.toFixed(1)}x</span>
+          </div>
+          <input
+            type="range"
+            min="0.1" max="3" step="0.1"
+            value={speed}
+            onChange={(e) => setSpeed(parseFloat(e.target.value))}
+            className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-white/60">
+            <span>Damping</span>
+            <span className="font-mono">{damping.toFixed(2)}</span>
+          </div>
+          <input
+            type="range"
+            min="0" max="2" step="0.05"
+            value={damping}
+            onChange={(e) => setDamping(parseFloat(e.target.value))}
+            className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-white/60">
+            <span>Mesh Resolution</span>
+            <span className="font-mono">{resolution}</span>
+          </div>
+          <input
+            type="range"
+            min="16" max="128" step="16"
+            value={resolution}
+            onChange={(e) => setResolution(parseInt(e.target.value))}
+            className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+          />
+        </div>
+
+        {soundEnabled && (
+          <div className="space-y-2 pt-2 border-t border-white/10">
+            <div className="flex justify-between text-xs text-white/60">
+              <span>Base Frequency</span>
+              <span className="font-mono">{baseFrequency} Hz</span>
+            </div>
+            <input
+              type="range"
+              min="55" max="440" step="1"
+              value={baseFrequency}
+              onChange={(e) => setBaseFrequency(parseInt(e.target.value))}
+              className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
