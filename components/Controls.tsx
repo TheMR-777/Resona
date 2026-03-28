@@ -1,19 +1,26 @@
 'use client';
 
 import React from 'react';
-import { useStore } from '@/lib/store';
-import { Volume2, VolumeX, Settings2, Eye, Box } from 'lucide-react';
+import { useStore, THEMES, ThemeName, SurfaceStyle } from '@/lib/store';
+import { Volume2, VolumeX, Settings2 } from 'lucide-react';
 
 export function Controls() {
-  const {
-    speed, setSpeed,
-    damping, setDamping,
-    resolution, setResolution,
-    viewMode, setViewMode,
-    soundEnabled, toggleSound,
-    baseFrequency, setBaseFrequency,
-    radius, setRadius
-  } = useStore();
+  const speed = useStore(state => state.speed);
+  const setSpeed = useStore(state => state.setSpeed);
+  const damping = useStore(state => state.damping);
+  const setDamping = useStore(state => state.setDamping);
+  const resolution = useStore(state => state.resolution);
+  const setResolution = useStore(state => state.setResolution);
+  const theme = useStore(state => state.theme);
+  const setTheme = useStore(state => state.setTheme);
+  const surfaceStyle = useStore(state => state.surfaceStyle);
+  const setSurfaceStyle = useStore(state => state.setSurfaceStyle);
+  const soundEnabled = useStore(state => state.soundEnabled);
+  const toggleSound = useStore(state => state.toggleSound);
+  const baseFrequency = useStore(state => state.baseFrequency);
+  const setBaseFrequency = useStore(state => state.setBaseFrequency);
+  const radius = useStore(state => state.radius);
+  const setRadius = useStore(state => state.setRadius);
 
   return (
     <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl space-y-6 w-80">
@@ -24,13 +31,6 @@ export function Controls() {
         </h2>
         
         <div className="flex gap-2">
-          <button
-            onClick={() => setViewMode(viewMode === 'solid' ? 'wireframe' : 'solid')}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/70 transition-colors"
-            title="Toggle View Mode"
-          >
-            {viewMode === 'solid' ? <Box className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
           <button
             onClick={toggleSound}
             className={`p-2 rounded-lg transition-colors ${
@@ -46,6 +46,38 @@ export function Controls() {
       </div>
 
       <div className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-white/60">
+            <span>Theme</span>
+          </div>
+          <select
+            value={theme}
+            onChange={(e) => setTheme(e.target.value as ThemeName)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
+          >
+            {Object.entries(THEMES).map(([k, v]) => (
+              <option key={k} value={k} className="bg-slate-900">{v.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-white/60">
+            <span>Surface Style</span>
+          </div>
+          <select
+            value={surfaceStyle}
+            onChange={(e) => setSurfaceStyle(e.target.value as SurfaceStyle)}
+            className="w-full bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-indigo-500"
+          >
+            <option value="standard" className="bg-slate-900">Standard</option>
+            <option value="wireframe" className="bg-slate-900">Wireframe</option>
+            <option value="glass" className="bg-slate-900">Frosted Glass</option>
+            <option value="clay" className="bg-slate-900">Matte Clay</option>
+            <option value="neon" className="bg-slate-900">Neon Glow</option>
+          </select>
+        </div>
+
         <div className="space-y-2">
           <div className="flex justify-between text-xs text-white/60">
             <span>Radius</span>

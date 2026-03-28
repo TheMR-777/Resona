@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useEffect } from 'react';
 import { ThreeEvent, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useStore, besselJ, BESSEL_ROOTS, Mode } from '@/lib/store';
+import { useStore, besselJ, BESSEL_ROOTS, Mode, THEMES } from '@/lib/store';
 
 export function Membrane3D() {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -11,10 +11,14 @@ export function Membrane3D() {
   
   const resolution = useStore(state => state.resolution);
   const activeModes = useStore(state => state.activeModes);
+  const updateModeAmplitudes = useStore(state => state.updateModeAmplitudes);
   const speed = useStore(state => state.speed);
-  const viewMode = useStore(state => state.viewMode);
+  const themeName = useStore(state => state.theme);
+  const surfaceStyle = useStore(state => state.surfaceStyle);
   const poke = useStore(state => state.poke);
   const radius = useStore(state => state.radius);
+  
+  const theme = THEMES[themeName];
   
   const timeRef = useRef(0);
 
@@ -77,8 +81,11 @@ export function Membrane3D() {
   }, [resolution]);
 
   // Precompute shapes for active modes
-  const modeShapes = useMemo(() => {
-    const shapes = new Map<string, Float32Array>();
+  const activeModeKeys = activeModes.map(m => `${m.n},${m.m}`).join('|');
+  const modeShapesRef = useRef(new Map<string, Float32Array>());
+  
+  useEffect(() => {
+    const shapes = modeShapesRef.current;
     
     activeModes.forEach(mode => {
       const key = `${mode.n},${mode.m}`;
@@ -94,11 +101,12 @@ export function Membrane3D() {
         shapes.set(key, shape);
       }
     });
-    
-    return shapes;
-  }, [activeModes, vertices.length, radii, thetas]);
+  }, [activeModeKeys, activeModes, vertices.length, radii, thetas]);
 
   useFrame((state, delta) => {
+    // Update amplitudes first
+    updateModeAmplitudes(delta);
+    
     if (!geometryRef.current) return;
     
     timeRef.current += delta * speed;
@@ -113,6 +121,7 @@ export function Membrane3D() {
     }
     
     // Sum active modes
+    const modeShapes = modeShapesRef.current;
     activeModes.forEach(mode => {
       const key = `${mode.n},${mode.m}`;
       const shape = modeShapes.get(key);
@@ -180,19 +189,57 @@ export function Membrane3D() {
         />
       </bufferGeometry>
       
-      {viewMode === 'solid' ? (
+      {surfaceStyle === 'standard' && (
         <meshStandardMaterial 
-          color="#4f46e5" 
-          roughness={0.2} 
-          metalness={0.8} 
+          color={theme.surfaceColor} 
+          roughness={0.15} 
+          metalness={0.85} 
+          envMapIntensity={1.2}
           side={THREE.DoubleSide}
-          wireframe={false}
         />
-      ) : (
+      )}
+      {surfaceStyle === 'wireframe' && (
         <meshBasicMaterial 
-          color="#818cf8" 
+          color={theme.wireframeColor} 
           wireframe={true} 
           side={THREE.DoubleSide}
+        />
+      )}
+      {surfaceStyle === 'glass' && (
+        <meshPhysicalMaterial 
+          color={theme.surfaceColor} 
+          transmission={1} 
+          opacity={1} 
+          metalness={0.1} 
+          roughness={0.05} 
+          ior={1.5} 
+          thickness={0.5} 
+          specularIntensity={1}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+          envMapIntensity={1.5}
+          side={THREE.DoubleSide} 
+          transparent 
+        />
+      )}
+      {surfaceStyle === 'clay' && (
+        <meshStandardMaterial 
+          color={theme.surfaceColor} 
+          roughness={1} 
+          metalness={0} 
+          envMapIntensity={0.2}
+          side={THREE.DoubleSide} 
+        />
+      )}
+      {surfaceStyle === 'neon' && (
+        <meshStandardMaterial 
+          color="#ffffff" 
+          emissive={theme.surfaceColor} 
+          emissiveIntensity={2.5} 
+          roughness={0.4}
+          metalness={0.8}
+          toneMapped={false} 
+          side={THREE.DoubleSide} 
         />
       )}
     </mesh>

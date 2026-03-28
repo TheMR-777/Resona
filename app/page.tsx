@@ -5,8 +5,11 @@ import { Scene } from '@/components/Scene';
 import { ModeGrid } from '@/components/ModeGrid';
 import { Controls } from '@/components/Controls';
 import { Activity } from 'lucide-react';
+import { useStore, THEMES } from '@/lib/store';
 
 export default function Page() {
+  const themeName = useStore(state => state.theme);
+  const theme = THEMES[themeName];
   useEffect(() => {
     const originalWarn = console.warn;
     console.warn = (...args) => {
@@ -19,7 +22,7 @@ export default function Page() {
   }, []);
 
   return (
-    <main className="relative w-full h-screen overflow-hidden bg-slate-950 text-white font-sans">
+    <main className={`relative w-full h-screen overflow-hidden bg-gradient-to-br ${theme.bgClass} text-white font-sans transition-colors duration-1000`}>
       {/* 3D Scene Background */}
       <Scene />
       

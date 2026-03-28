@@ -31,6 +31,77 @@ export function besselJ(n: number, x: number): number {
   return sum;
 }
 
+export type ThemeName = 'midnight' | 'sunset' | 'ocean' | 'monochrome' | 'ethereal';
+export type SurfaceStyle = 'standard' | 'wireframe' | 'glass' | 'clay' | 'neon';
+
+export const THEMES: Record<ThemeName, {
+  name: string;
+  bgClass: string;
+  envPreset: string;
+  lightPrimary: string;
+  lightSecondary: string;
+  surfaceColor: string;
+  wireframeColor: string;
+  bloomIntensity: number;
+  ambientIntensity: number;
+}> = {
+  midnight: {
+    name: 'Midnight',
+    bgClass: 'from-slate-950 via-slate-900 to-indigo-950',
+    envPreset: 'city',
+    lightPrimary: '#e0e7ff',
+    lightSecondary: '#818cf8',
+    surfaceColor: '#4f46e5',
+    wireframeColor: '#818cf8',
+    bloomIntensity: 1.5,
+    ambientIntensity: 0.2,
+  },
+  sunset: {
+    name: 'Sunset',
+    bgClass: 'from-orange-950 via-red-950 to-purple-950',
+    envPreset: 'sunset',
+    lightPrimary: '#ffedd5',
+    lightSecondary: '#f43f5e',
+    surfaceColor: '#ea580c',
+    wireframeColor: '#fb923c',
+    bloomIntensity: 2.0,
+    ambientIntensity: 0.3,
+  },
+  ocean: {
+    name: 'Ocean',
+    bgClass: 'from-cyan-950 via-blue-950 to-teal-950',
+    envPreset: 'night',
+    lightPrimary: '#cffafe',
+    lightSecondary: '#06b6d4',
+    surfaceColor: '#0ea5e9',
+    wireframeColor: '#38bdf8',
+    bloomIntensity: 1.2,
+    ambientIntensity: 0.4,
+  },
+  monochrome: {
+    name: 'Monochrome',
+    bgClass: 'from-zinc-950 via-zinc-900 to-black',
+    envPreset: 'studio',
+    lightPrimary: '#ffffff',
+    lightSecondary: '#a1a1aa',
+    surfaceColor: '#d4d4d8',
+    wireframeColor: '#ffffff',
+    bloomIntensity: 0.8,
+    ambientIntensity: 0.2,
+  },
+  ethereal: {
+    name: 'Ethereal',
+    bgClass: 'from-fuchsia-950 via-violet-950 to-purple-950',
+    envPreset: 'dawn',
+    lightPrimary: '#ffffff',
+    lightSecondary: '#d946ef',
+    surfaceColor: '#e879f9',
+    wireframeColor: '#f0abfc',
+    bloomIntensity: 2.5,
+    ambientIntensity: 0.5,
+  }
+};
+
 export interface Mode {
   n: number;
   m: number;
@@ -45,7 +116,8 @@ interface AppState {
   speed: number;
   damping: number;
   resolution: number;
-  viewMode: 'solid' | 'wireframe';
+  theme: ThemeName;
+  surfaceStyle: SurfaceStyle;
   soundEnabled: boolean;
   baseFrequency: number;
   radius: number;
@@ -55,7 +127,8 @@ interface AppState {
   setSpeed: (speed: number) => void;
   setDamping: (damping: number) => void;
   setResolution: (resolution: number) => void;
-  setViewMode: (viewMode: 'solid' | 'wireframe') => void;
+  setTheme: (theme: ThemeName) => void;
+  setSurfaceStyle: (style: SurfaceStyle) => void;
   toggleSound: () => void;
   setBaseFrequency: (freq: number) => void;
   setRadius: (radius: number) => void;
@@ -68,7 +141,8 @@ export const useStore = create<AppState>((set, get) => ({
   speed: 1,
   damping: 0.5,
   resolution: 64,
-  viewMode: 'solid',
+  theme: 'midnight',
+  surfaceStyle: 'standard',
   soundEnabled: false,
   baseFrequency: 110, // A2
   radius: 1,
@@ -90,13 +164,14 @@ export const useStore = create<AppState>((set, get) => ({
   setSpeed: (speed) => set({ speed }),
   setDamping: (damping) => set({ damping }),
   setResolution: (resolution) => set({ resolution }),
-  setViewMode: (viewMode) => set({ viewMode }),
+  setTheme: (theme) => set({ theme }),
+  setSurfaceStyle: (surfaceStyle) => set({ surfaceStyle }),
   toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
   setBaseFrequency: (baseFrequency) => set({ baseFrequency }),
   setRadius: (radius) => set({ radius }),
   
   updateModeAmplitudes: (deltaTime) => set((state) => {
-    if (state.damping <= 0) return state;
+    if (state.damping <= 0 || state.activeModes.length === 0) return state;
     const decay = Math.exp(-state.damping * deltaTime);
     return {
       activeModes: state.activeModes.map(mode => ({
