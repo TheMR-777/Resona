@@ -187,7 +187,6 @@ class NextjsUpdater:
             'basePath': r'basePath\s*:\s*(["\'])(.*?)\1',
             'output': r'output\s*:\s*(["\'])(.*?)\1',
             'trailingSlash': r'trailingSlash\s*:\s*(true|false)',
-            'unoptimized': r'unoptimized\s*:\s*(true|false)'
         }
 
         preserved_values = {}
@@ -199,14 +198,29 @@ class NextjsUpdater:
         for key, val in preserved_values.items():
             Colors.log(f"Preserving Next.js config: {val}", "info")
             if re.search(patterns[key], new_content):
-                # Replace if exists in new_content
                 new_content = re.sub(patterns[key], val, new_content)
             else:
-                # Inject into the nextConfig object
-                # This is a bit naive but should work for standard NextConfig objects
                 new_content = re.sub(
                     r'(const\s+nextConfig\s*:\s*NextConfig\s*=\s*\{)', 
                     f'\\1\n  {val},', 
+                    new_content, 
+                    count=1
+                )
+
+        # Special handling for images.unoptimized
+        if 'unoptimized: true' in old_content or 'unoptimized: false' in old_content:
+            Colors.log("Preserving Next.js config: unoptimized", "info")
+            if 'images:' in new_content:
+                # If images block exists, try to inject/replace within it
+                if 'unoptimized:' in new_content:
+                    new_content = re.sub(r'unoptimized\s*:\s*(true|false)', 'unoptimized: true', new_content)
+                else:
+                    new_content = re.sub(r'(images\s*:\s*\{)', r'\1\n    unoptimized: true,', new_content)
+            else:
+                # Inject images block
+                new_content = re.sub(
+                    r'(const\s+nextConfig\s*:\s*NextConfig\s*=\s*\{)', 
+                    r'\1\n  images: { unoptimized: true },', 
                     new_content, 
                     count=1
                 )
