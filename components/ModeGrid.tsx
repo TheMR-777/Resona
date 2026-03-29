@@ -1,27 +1,41 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore, BESSEL_ROOTS } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export function ModeGrid() {
+  const [isExpanded, setIsExpanded] = useState(true);
   const activeModes = useStore(state => state.activeModes);
   const toggleMode = useStore(state => state.toggleMode);
   const clearModes = useStore(state => state.clearModes);
 
   return (
-    <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl p-4 shadow-2xl">
-      <div className="flex justify-between items-center mb-4">
+    <div className={`bg-black/40 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl transition-all duration-300 overflow-hidden ${isExpanded ? 'p-4' : 'p-3'}`}>
+      <div className={`flex justify-between items-center ${isExpanded ? 'mb-4' : ''}`}>
         <h3 className="text-sm font-medium text-white/80 uppercase tracking-wider">Harmonics (n, m)</h3>
-        <button 
-          onClick={clearModes}
-          className="text-xs text-rose-400 hover:text-rose-300 transition-colors"
-        >
-          Clear All
-        </button>
+        <div className="flex items-center gap-2">
+          {isExpanded && (
+            <button 
+              onClick={clearModes}
+              className="text-xs text-rose-400 hover:text-rose-300 transition-colors mr-2"
+            >
+              Clear All
+            </button>
+          )}
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-1.5 rounded-lg bg-white/5 text-white/50 border border-transparent hover:bg-white/10 transition-colors"
+            title={isExpanded ? "Collapse" : "Expand"}
+          >
+            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
       
-      <div className="grid grid-cols-6 gap-2">
+      {isExpanded && (
+        <div className="grid grid-cols-6 gap-2">
         {/* Header row for m */}
         <div className="text-xs text-white/40 text-center">n \ m</div>
         {[1, 2, 3, 4, 5].map(m => (
@@ -64,7 +78,8 @@ export function ModeGrid() {
             })}
           </React.Fragment>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

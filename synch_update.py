@@ -21,7 +21,6 @@ FILES_TO_OVERWRITE = [
     "postcss.config.mjs", 
     "eslint.config.mjs",
     ".eslintrc.json",
-    ".gitignore",
     ".env.example"
 ]
 
@@ -249,6 +248,12 @@ class NextjsUpdater:
                     if os.path.exists(root_dest):
                         shutil.rmtree(root_dest)
                     shutil.copytree(update_src, root_dest)
+
+            # 1.1 Cleanup API routes (not supported in static export)
+            api_path = os.path.join(self.root_dir, "app", "api")
+            if os.path.exists(api_path):
+                Colors.log("Removing 'app/api' directory (unsupported in static export)...", "info")
+                shutil.rmtree(api_path)
 
             # 2. Smart Merges
             self.merge_package_json()

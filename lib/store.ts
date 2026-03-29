@@ -121,6 +121,7 @@ interface AppState {
   soundEnabled: boolean;
   baseFrequency: number;
   radius: number;
+  advancedMode: boolean;
   
   toggleMode: (n: number, m: number) => void;
   clearModes: () => void;
@@ -132,6 +133,7 @@ interface AppState {
   toggleSound: () => void;
   setBaseFrequency: (freq: number) => void;
   setRadius: (radius: number) => void;
+  toggleAdvancedMode: () => void;
   updateModeAmplitudes: (deltaTime: number) => void;
   poke: (r: number, theta: number) => void;
 }
@@ -146,6 +148,7 @@ export const useStore = create<AppState>((set, get) => ({
   soundEnabled: false,
   baseFrequency: 110, // A2
   radius: 1,
+  advancedMode: false,
   
   toggleMode: (n, m) => set((state) => {
     const exists = state.activeModes.find(mode => mode.n === n && mode.m === m);
@@ -169,6 +172,7 @@ export const useStore = create<AppState>((set, get) => ({
   toggleSound: () => set((state) => ({ soundEnabled: !state.soundEnabled })),
   setBaseFrequency: (baseFrequency) => set({ baseFrequency }),
   setRadius: (radius) => set({ radius }),
+  toggleAdvancedMode: () => set((state) => ({ advancedMode: !state.advancedMode })),
   
   updateModeAmplitudes: (deltaTime) => set((state) => {
     if (state.damping <= 0 || state.activeModes.length === 0) return state;

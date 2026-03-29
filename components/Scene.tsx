@@ -13,7 +13,7 @@ export function Scene() {
   const theme = THEMES[themeName];
 
   return (
-    <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <div className="absolute inset-0">
       <AudioEngine />
       <Canvas dpr={[1, 2]}>
         <PerspectiveCamera makeDefault position={[0, -2.5, 2]} fov={45} />
