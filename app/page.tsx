@@ -29,8 +29,8 @@ export default function Page() {
       {/* Header Overlay */}
       <div className="absolute top-0 left-0 right-0 p-6 pointer-events-none z-10">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center backdrop-blur-md">
-            <Activity className="w-5 h-5 text-indigo-400" />
+          <div className={`w-10 h-10 rounded-xl ${theme.accent.muted.split(' ')[0]} border ${theme.accent.border}/30 flex items-center justify-center backdrop-blur-md`}>
+            <Activity className={`w-5 h-5 ${theme.accent.text}`} />
           </div>
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-white/90">Resona</h1>

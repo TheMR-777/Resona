@@ -84,6 +84,11 @@ export function Membrane3D() {
   const activeModeKeys = activeModes.map(m => `${m.n},${m.m}`).join('|');
   const modeShapesRef = useRef(new Map<string, Float32Array>());
   
+  // Clear shapes when resolution changes to prevent NaN errors from mismatched array lengths
+  useEffect(() => {
+    modeShapesRef.current.clear();
+  }, [resolution]);
+  
   useEffect(() => {
     const shapes = modeShapesRef.current;
     
@@ -101,7 +106,7 @@ export function Membrane3D() {
         shapes.set(key, shape);
       }
     });
-  }, [activeModeKeys, activeModes, vertices.length, radii, thetas]);
+  }, [activeModeKeys, activeModes, vertices, radii, thetas]);
 
   useFrame((state, delta) => {
     // Update amplitudes first
@@ -125,7 +130,8 @@ export function Membrane3D() {
     activeModes.forEach(mode => {
       const key = `${mode.n},${mode.m}`;
       const shape = modeShapes.get(key);
-      if (shape) {
+      // Ensure shape exists and matches current resolution to avoid NaN errors
+      if (shape && shape.length === numVertices) {
         // frequency is relative to fundamental.
         // Let's scale it so it looks nice visually.
         const angularFreq = mode.frequency * 5; 
